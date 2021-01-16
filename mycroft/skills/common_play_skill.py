@@ -15,7 +15,7 @@
 import re
 from enum import Enum, IntEnum
 from abc import ABC, abstractmethod
-from mycroft.messagebus.message import Message
+from mycroft.messagebus.message import Message, dig_for_message
 from .mycroft_skill import MycroftSkill
 from .audioservice import AudioService
 
@@ -290,7 +290,10 @@ class CommonPlaySkill(MycroftSkill, ABC):
                 'status': status
                 }
         data = {**data, **kwargs}  # Merge extra arguments
-        self.bus.emit(Message('play:status', data))
+        message = dig_for_message()
+        m = message.forward('play:status', data) if message \
+            else Message('play:status', data)
+        self.bus.emit(m)
 
     def CPS_send_tracklist(self, tracklist):
         """Inform system of playlist track info.
